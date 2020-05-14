@@ -25,72 +25,73 @@ class network:
         self.targets = targets
         self.hidden_layer_neurons = hidden_layer_neurons
         self.learning_rate = learning_rate
-        self.weights_layer_1 = np.random.uniform(
-            low=-0.5, high=0.6, size=(inputs.shape[1], hidden_layer_neurons + 1))
-        self.weights_layer_2 = np.random.uniform(
-            low=-0.5, high=0.6, size=(hidden_layer_neurons + 1, 1))
+        self.weights_layer_1 = np.random.random(
+            size=(inputs.shape[1], hidden_layer_neurons + 1))
+        self.weights_layer_2 = np.random.random(
+            size=(hidden_layer_neurons + 1, 1))
         self.activations = activations
         self.errors = errors
 
     def fit(self, epochs):
         for i in range(epochs):
             # 1a pesos entre input and hidden
-            self.v_i = np.dot(self.inputs, self.weights_layer_1)
+            v_i = np.dot(self.inputs, self.weights_layer_1)
             # 1b activacion sigmoid de 1a
-            self.output_v_i = self.activations.sigmoid(self.v_i)
+            output_v_i = self.activations.sigmoid(v_i)
             # 1c
-            self.w_i = np.dot(self.output_v_i, self.weights_layer_2)
+            w_i = np.dot(output_v_i, self.weights_layer_2)
             # 1d
-            self.output_w_i = self.activations.sigmoid(self.w_i)
+            output_w_i = self.activations.sigmoid(w_i)
 
             # 2 Backpropagation
             # a. Output Layer
             # i
-            self.local_error = np.subtract(self.targets, self.output_w_i)
+            local_error = np.subtract(self.targets, output_w_i)
             # ii
             # 1
-            self.predicted_derivate1 = self.activations.sigmoid_derivative(
-                self.output_w_i)
+            predicted_derivate1 = self.activations.sigmoid_derivative(
+                output_w_i)
             # 2 deltas
-            self.deltas1 = np.multiply(
-                self.predicted_derivate1, self.local_error)
+            deltas1 = np.multiply(
+                predicted_derivate1, local_error)
 
             # b. Hidden Layer
             # i
-            self.new_error = np.dot(
-                self.deltas1, np.transpose(self.weights_layer_2))
+            new_error = np.dot(
+                deltas1, np.transpose(self.weights_layer_2))
             # ii deltas
             # 1
-            self.predicted_derivate2 = self.activations.sigmoid_derivative(
-                self.output_v_i)
+            predicted_derivate2 = self.activations.sigmoid_derivative(
+                output_v_i)
             # 2 deltas
-            self.deltas2 = np.multiply(
-                self.new_error, self.predicted_derivate2)
+            deltas2 = np.multiply(
+                new_error, predicted_derivate2)
 
             # c. Adjusts weights
             # i
-            self.aw_i = np.dot(np.transpose(self.output_v_i), self.deltas1)
+            aw_i = np.dot(np.transpose(output_v_i), deltas1)
             # ii
-            self.weights_layer_2 += np.multiply(self.aw_i, self.learning_rate)
+            self.weights_layer_2 += np.multiply(aw_i, self.learning_rate)
             # iii
-            self.av_i = np.dot(np.transpose(self.inputs), self.deltas2)
+            av_i = np.dot(np.transpose(self.inputs), deltas2)
             # iv
-            self.weights_layer_1 += np.multiply(self.av_i, self.learning_rate)
+            self.weights_layer_1 += np.multiply(av_i, self.learning_rate)
 
     def predict(self, inputs):
         # i
-        self.pv_i = np.dot(inputs, self.weights_layer_1)
+        pv_i = np.dot(inputs, self.weights_layer_1)
         # ii
-        self.z_i = self.activations.sigmoid(self.pv_i)
+        z_i = self.activations.sigmoid(pv_i)
         # iii
-        self.pw_i = np.dot(self.z_i, self.weights_layer_2)
+        pw_i = np.dot(z_i, self.weights_layer_2)
         # iv
-        self.y_i = self.activations.sigmoid(self.pw_i)
+        y_i = self.activations.sigmoid(pw_i)
         # v
-        return self.y_i
+        return y_i
 
 
-class Measures():
+class Measures:
+
     def __init__(self, real, pred):
         self.real = real
         self.pred = pred
@@ -101,13 +102,13 @@ class Measures():
         self.tp = 0
 
         for i in range(len(self.real)):
-            if self.real[i] <= 0 and self.pred[i] <= 0:
+            if self.real[i] <= 0.5 and self.pred[i] <= 0.5:
                 self.tn += 1
-            elif self.real[i] <= 0 and self.pred[i] > 0:
+            elif self.real[i] <= 0.5 < self.pred[i]:
                 self.fp += 1
-            elif self.real[i] > 0 and self.pred[i] <= 0:
+            elif self.real[i] > 0.5 >= self.pred[i]:
                 self.fn += 1
-            elif self.real[i] > 0 and self.pred[i] > 0:
+            elif self.real[i] > 0.5 and self.pred[i] > 0.5:
                 self.tp += 1
 
     def precision(self):
@@ -133,7 +134,7 @@ class Measures():
         return cm
 
 
-def train(inputs, targets):
+def get_trained_net(inputs, targets):
     net = network(inputs, targets)
     epochs = 10000
     net.fit(epochs)
@@ -143,24 +144,25 @@ def train(inputs, targets):
 if __name__ == "__main__":
 
     for i in range(1, 7):
-        file_object = open("data"+str(i)+".txt", "r")
-        f1 = file_object.readlines()
+        file_object = open("data" + str(i) + ".txt", "r")
+        data_file = file_object.readlines()
         inputs = []
         targets = []
-        for x in f1[1:]:
-            data = list(map(int, x.strip().split()))
-            inputs.append([inp for inp in data[:3]])
-            targets.append([data[3]])
-
+        n = int(data_file[0])
+        for j in range(1, n + 1):
+            line = data_file[j]
+            data = list(map(int, line.strip().split()))
+            inputs.append([inp for inp in data[:len(line) - 1]])
+            targets.append([data[-1]])
         inputs = np.array(inputs)
         targets = np.array(targets)
 
-        net = train(inputs, targets)
+        net = get_trained_net(inputs, targets)
 
         predicted = net.predict(inputs)
         m = Measures(targets, predicted)
 
-        print("----------data"+str(i)+"-------------")
+        print("----------data" + str(i) + "-------------")
         print("----Measures----")
 
         print("precision %s" % m.precision())
@@ -171,11 +173,11 @@ if __name__ == "__main__":
         track = (np.abs(predicted - targets) <= 0.2).all(axis=1)
         print()
         print("----Result----")
+        print("predicted:\n", predicted)
+        print("target:\n", targets)
         try:
-            assert(np.array_equal(track, np.array([True, True, True, True])))
+            assert (np.array_equal(track, np.array([True, True, True, True])))
             print("PREDICT PASSED!")
         except:
             print("PREDICT NOT PASSED!")
-        print("\n\n")
-        #print("pred:", predicted)
-        #print("targ:", targets)
+        print("\n")
