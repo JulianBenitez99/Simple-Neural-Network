@@ -152,7 +152,7 @@ if __name__ == "__main__":
         for j in range(1, n + 1):
             line = data_file[j]
             data = list(map(int, line.strip().split()))
-            inputs.append([inp for inp in data[:len(line) - 1]])
+            inputs.append([inp for inp in data[:len(data) - 1]])
             targets.append([data[-1]])
         inputs = np.array(inputs)
         targets = np.array(targets)
