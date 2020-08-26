@@ -34,57 +34,33 @@ class network:
 
     def fit(self, epochs):
         for i in range(epochs):
-            # 1a pesos entre input and hidden
             v_i = np.dot(self.inputs, self.weights_layer_1)
-            # 1b activacion sigmoid de 1a
             output_v_i = self.activations.sigmoid(v_i)
-            # 1c
             w_i = np.dot(output_v_i, self.weights_layer_2)
-            # 1d
             output_w_i = self.activations.sigmoid(w_i)
 
-            # 2 Backpropagation
-            # a. Output Layer
-            # i
+            # Backpropagation
             local_error = self.targets - output_w_i
-            # ii
-            # 1
-            predicted_derivate1 = self.activations.sigmoid_derivative(
-                output_w_i)
-            # 2 deltas
+
+            predicted_derivate1 = self.activations.sigmoid_derivative(output_w_i)
             deltas1 = predicted_derivate1 * local_error
 
-            # b. Hidden Layer
-            # i
-            new_error = np.dot(
-                deltas1, np.transpose(self.weights_layer_2))
-            # ii deltas
-            # 1
-            predicted_derivate2 = self.activations.sigmoid_derivative(
-                output_v_i)
-            # 2 deltas
+            # Hidden Layer
+            new_error = np.dot(deltas1, np.transpose(self.weights_layer_2))
+            predicted_derivate2 = self.activations.sigmoid_derivative(output_v_i)
             deltas2 = new_error * predicted_derivate2
 
-            # c. Adjusts weights
-            # i
+            # Adjusts weights
             aw_i = np.dot(np.transpose(output_v_i), deltas1)
-            # ii
             self.weights_layer_2 += aw_i * self.learning_rate
-            # iii
             av_i = np.dot(np.transpose(self.inputs), deltas2)
-            # iv
             self.weights_layer_1 += av_i * self.learning_rate
 
     def predict(self, inputs):
-        # i
         pv_i = np.dot(inputs, self.weights_layer_1)
-        # ii
         z_i = self.activations.sigmoid(pv_i)
-        # iii
         pw_i = np.dot(z_i, self.weights_layer_2)
-        # iv
         y_i = self.activations.sigmoid(pw_i)
-        # v
         return y_i
 
 
