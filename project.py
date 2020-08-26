@@ -118,7 +118,7 @@ def get_trained_net(inputs, targets):
 if __name__ == "__main__":
 
     for i in range(1, 7):
-        file_object = open("data" + str(i) + ".txt", "r")
+        file_object = open("data/data" + str(i) + ".txt", "r")
         data_file = file_object.readlines()
         inputs = []
         targets = []
